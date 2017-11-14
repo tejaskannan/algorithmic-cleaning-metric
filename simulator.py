@@ -10,7 +10,7 @@ class Simulator:
 		self.dataset = Dataset(file_name)
 		fd1 = FunctionalDependency(["zip"], ["state"])
 		fd2 = FunctionalDependency(["city", "zip"], ["state"])
-		self.constraints = [fd1, fd2]
+		self.constraints = [fd1]
 		
 
 	def run(self):
@@ -18,8 +18,10 @@ class Simulator:
 		print("Brute Force Number of Functions: " + str(detector.find_violations()))
 		detector = SRSDetector(self.dataset, self.constraints, 0.01, 1)
 		print("SRS Number of Functions: " + str(detector.find_violations()))
-		detector = WeightedSampleDetector(self.dataset, self.constraints, 0.01, 1)
-		print("Weighted Number of Functions: " + str(detector.find_violations()))
+		detector = WeightedSampleDetector(self.dataset, self.constraints, 0.01, 1, use_inputs=True)
+		print("Weighted Number of Functions Ordered By Inputs: " + str(detector.find_violations()))
+		detector = WeightedSampleDetector(self.dataset, self.constraints, 0.01, 1, use_inputs=False)
+		print("Weighted Number of Functions Ordered By Outputs: " + str(detector.find_violations()))
 
 if __name__ == "__main__":
 	simulator = Simulator("datasets/dirty_hospital_small.csv")
