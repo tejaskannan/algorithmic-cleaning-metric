@@ -8,7 +8,8 @@ class RandomCacheDetector(CacheDetector):
 		super(RandomCacheDetector, self).__init__(dataset, constraints, cache_size)
 
 	def remove_element_from_cache(self):
-		index_to_remove = random.randint(0, self.cache_size - 1)
-		key_to_remove = list(self.constraint_cache.keys())[index_to_remove]
-		del self.constraint_cache[key_to_remove]
+		self.constraint_cache.popitem()		
+		#index_to_remove = random.randint(0, self.cache_size - 1)
+		#key_to_remove = list(self.constraint_cache.keys())[index_to_remove]
+		#del self.constraint_cache[key_to_remove]
 
