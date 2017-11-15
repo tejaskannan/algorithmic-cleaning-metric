@@ -4,6 +4,8 @@ import pandas as pd
 class Dataset:
 	
 	def __init__(self, file_name):
+		assert file_name != None and len(file_name) > 0
+
 		self.columns = []
 		data = {}
 		with open(file_name, 'r') as csv_file:
@@ -34,6 +36,9 @@ class Dataset:
 		if index > -1:
 			return index + 1
 		return index
+
+	def sort_values(self, attrs):
+		return self.dataset.sort_values(attrs)
 
 	def group_by(self, input_attrs):
 		return self.dataset.groupby(input_attrs)

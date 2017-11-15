@@ -6,7 +6,8 @@ class BooleanConstraint:
 		self.output_attr = output_attr
 
 	# Returns True if the constraint is upheld, False if violated.
-	# Tests whether f(row1_inputs) == f(row2_inputs) => f(row1_outputs) == f(row2_outputs)
+	# Tests whether f_1(<row1_inputs>, <row2_inputs>) => f_2(<row1_outputs>, <row2_outputs>)
+	# The functions f_1 and f_2 are defined in this evaluate routine.
 	# Input rows are named tuples given by output of DataFrame iterator.
 	def evaluate(self, row1_tuple, row2_tuple):
 		pass
