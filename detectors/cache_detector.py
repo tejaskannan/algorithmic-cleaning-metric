@@ -19,10 +19,11 @@ class CacheDetector(Detector):
 				if i <= index:
 					continue
 				for j in range(0, len(self.constraints)):
-					evaluated_value = self.check_cache(row, r, self.constraints[j], j)
+					key1, key2 = self.get_attribute_keys(row, r, self.constraints[j], j)
+					evaluated_value = self.check_cache(key1, key2)
 					if evaluated_value == None:
 						evaluated_value = self.constraints[j].evaluate(row, r)
-						self.add_to_cache(self.get_attributes_key(row, r, self.constraints[j], j), evaluated_value)
+						self.add_to_cache(key1, evaluated_value)
 						num_comparisons += 1
 					if not evaluated_value:
 						return num_comparisons, num_comparisons, 1.0
@@ -47,24 +48,22 @@ class CacheDetector(Detector):
 		self.constraint_cache[key] = eval_value
 
 	# Returns True/False if constraint is cached, None if not in cache
-	def check_cache(self, row1, row2, constraint, constraint_index):
-		key = self.get_attributes_key(row1, row2, constraint, constraint_index)
-		if key in self.constraint_cache:
-			return self.constraint_cache[key]
-		key = self.get_attributes_key(row2, row1, constraint, constraint_index)
-		if key in self.constraint_cache:
-			return self.constraint_cache[key]
+	def check_cache(self, key1, key2):
+		if key1 in self.constraint_cache:
+			return self.constraint_cache[key1]
+		if key2 in self.constraint_cache:
+			return self.constraint_cache[key2]
 		return None
 
 
 	def remove_element_from_cache(self):
 		pass
 
-	def get_attributes_key(self, row1, row2, constraint, constraint_index):
+	def get_attribute_keys(self, row1, row2, constraint, constraint_index):
 		row1_input = tuple([row1.loc[attr] for attr in constraint.get_input_attr()])
 		row1_output = tuple([row1.loc[attr] for attr in constraint.get_output_attr()])
 		row2_input = tuple([row2.loc[attr] for attr in constraint.get_input_attr()])
 		row2_output = tuple([row2.loc[attr] for attr in constraint.get_output_attr()])
-		return (row1_input, row2_input, row1_output, row2_output, constraint_index)
+		return (row1_input, row2_input, row1_output, row2_output, constraint_index), (row2_input, row1_input, row2_output, row2_input, constraint_index)
 
 

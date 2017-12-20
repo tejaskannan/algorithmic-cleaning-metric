@@ -3,8 +3,13 @@ import pandas as pd
 
 class Dataset:
 	
-	def __init__(self, file_name):
-		assert file_name != None and len(file_name) > 0
+	def __init__(self, file_name, dataset=None, use_dataset=False):
+		assert (file_name != None and len(file_name) > 0) or (use_dataset == True)
+
+		if use_dataset == True:
+			self.dataset = dataset
+			self.columns = list(dataset.columns)
+			return
 
 		self.columns = []
 		data = {}
@@ -37,8 +42,8 @@ class Dataset:
 			return index + 1
 		return index
 
-	def sort_values(self, attrs):
-		return self.dataset.sort_values(attrs)
+	def sort_values(self, attrs, asc=True):
+		return self.dataset.sort_values(attrs, ascending=asc)
 
 	def group_by(self, input_attrs):
 		return self.dataset.groupby(input_attrs)

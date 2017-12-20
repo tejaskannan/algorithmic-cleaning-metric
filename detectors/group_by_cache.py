@@ -8,8 +8,9 @@ class GroupByCacheDetector(RandomCacheDetector):
 		super(GroupByCacheDetector, self).__init__(dataset, constraints, cache_size)
 		self.grouped_dataset = self.dataset.group_by(self.get_attr_to_group_by(constraints))
 
-	# This algorithm works in O(n^2m) time where n is the number of records and m is the
-	# number of functional dependences (assuming each fd takes constant time)
+	# This algorithm will iterate over groups and cache results to prevent evaluating functional dependencies
+	# multiple times. The group sizes are often small and we would expect the violations to be within these groups 
+	# first. This algorithm will be extended to check other groups afterwards (maybe in a smarter way than just doing it randomly)
 	def find_violations(self):
 		num_comparisons = 0
 
@@ -28,10 +29,11 @@ class GroupByCacheDetector(RandomCacheDetector):
 		
 	def evaluate_records(self, record1, record2, num_comparisons):
 		for j in range(0, len(self.constraints)):
-			evaluated_value = self.check_cache(record1, record2, self.constraints[j], j)
+			key1, key2 = self.get_attribute_keys(record1, record2, self.constraints[j], j)
+			evaluated_value = self.check_cache(key1, key2)
 			if evaluated_value == None:
 				evaluated_value = self.constraints[j].evaluate(record1, record2)
-				self.add_to_cache(self.get_attributes_key(record1, record2, self.constraints[j], j), evaluated_value)
+				self.add_to_cache(key1, evaluated_value)
 				num_comparisons += 1
 			if not evaluated_value:
 				return False, num_comparisons
