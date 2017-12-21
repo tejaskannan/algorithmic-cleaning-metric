@@ -10,14 +10,15 @@ from detectors.weighted_sample import WeightedSampleDetector
 from detectors.hierarchical import HierarchicalDetector
 from detectors.hierarchical_sample import HierarchicalSampleDetector
 from detectors.hierarchical_epsilon_greedy import HierarchicalEpsilonGreedyDetector
+from detectors.individual_epsilon_greedy import IndividualEpsilonGreedyDetector
 from constraints.boolean_constraint import BooleanConstraint
 
 class Simulator:
 
 	def __init__(self, file_name):
 		self.dataset = Dataset(file_name)
-		constr1 = BooleanConstraint(["hospitalname"], "eq")
-		constr2 = BooleanConstraint(["providernumber"], "le")
+		constr1 = BooleanConstraint(["phone"], "eq")
+		constr2 = BooleanConstraint(["zip"], "neq")
 		constr3 = BooleanConstraint([], "none")
 		self.constraints = [constr1, constr2, constr3]
 		
@@ -25,22 +26,20 @@ class Simulator:
 	def run(self):
 		data_points = []
 		#legend = ["Hierarchical"]
-		max_num_comparisons = 500000
+		max_num_comparisons = 400000
 
 		legend = []
 		ep = 0.01
 		for i in range(0, 2):
 			start = time.time()
-			detector = HierarchicalEpsilonGreedyDetector(self.dataset, self.constraints[:], epsilon=ep)
+			detector = IndividualEpsilonGreedyDetector(self.dataset, self.constraints[:], epsilon1=ep, epsilon2=ep)
 			data_points.append(detector.find_violations(max_num_comparisons=max_num_comparisons))
 			end = time.time()
-			name = "Epsilon Greedy " + str(ep) + " Time v" + str(i)
+			name = "Individual Epsilon Greedy " + str(ep) + " Time v" + str(i)
 			print(name + " : " + str(end - start) + " seconds")
 			legend.append(name)
 		
 		legend = legend + ["Brute Force", "Hierarchical"]
-
-
 
 		start = time.time()
 		detector = BruteForceDetector(self.dataset, self.constraints)
@@ -54,7 +53,7 @@ class Simulator:
 		end = time.time()
 		print("Hierarchical Time: " + str(end - start) + " seconds")
 
-		plot(data_points, "Errors Found over Time", "Number of Comparisons", "Number of Errors", legend=legend, filename="output_500k_hospitalname_address1_2.png", ymax=7000)
+		plot(data_points, "Errors Found over Time", "Number of Comparisons", "Number of Errors", legend=legend, filename="output_500k_phone_zip.png", ymax=7000)
 
 		#start = time.time()
 		#detector = HierarchicalSampleDetector(self.dataset, self.constraints[:], 0.25)

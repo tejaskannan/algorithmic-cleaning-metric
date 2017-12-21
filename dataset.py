@@ -31,6 +31,9 @@ class Dataset:
 	def __iter__(self):
 		return self.dataset.iterrows()
 
+	def __len__(self):
+		return len(self.dataset)
+
 	def get_random_sample(self, fraction, weights=None):
 		if weights is None:
 			return self.dataset.sample(frac=fraction)

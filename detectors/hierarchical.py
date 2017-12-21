@@ -1,4 +1,5 @@
 import time
+import math
 from detectors.detector import Detector
 
 class HierarchicalDetector(Detector):
@@ -14,9 +15,9 @@ class HierarchicalDetector(Detector):
 
 		if self.most_constraining.is_equals():
 			self.constraints.pop(index)
-			self.ordered_dataset = self.dataset.group_by(most_constraining.get_attrs())
+			self.ordered_dataset = self.dataset.group_by(self.most_constraining.get_attrs())
 		elif self.most_constraining.is_range():
-			self.ordered_dataset = self.dataset.sort_values(most_constraining.get_attrs(), asc=most_constrainting.should_sort_ascending())
+			self.ordered_dataset = self.dataset.sort_values(self.most_constraining.get_attrs(), asc=self.most_constrainting.should_sort_ascending())
 		
 
 	# This algorithm will iterate over groups and cache results to prevent evaluating functional dependencies
@@ -24,13 +25,19 @@ class HierarchicalDetector(Detector):
 	# first. This algorithm will be extended to check other groups afterwards (maybe in a smarter way than just doing it randomly)
 	def find_violations(self, comp_freq=10000, max_num_comparisons=250000):
 		num_comparisons = 0
-		num_records_compared = 0
+
+		# account for the comparisons needed in preprocessing
+		num_records_compared = len(self.dataset) * math.ceil(math.log(len(self.dataset)))
 		num_errors = 0
 		comp_dict = {}
 
-		for name, group in self.ordered_dataset:
-			for index, record in group.iterrows():	
-				completed_indexes = set()
+		groups = [group for name, group in self.ordered_dataset]
+		#groups.sort(key=lambda g: len(g), reverse=False)
+
+
+		for group in groups:
+			completed_indexes = set()
+			for index, record in group.iterrows():
 				completed_indexes.add(index)
 				for inner_index, inner_record in group.iterrows():
 					if inner_index in completed_indexes:
@@ -54,7 +61,6 @@ class HierarchicalDetector(Detector):
 					if num_records_compared >= max_num_comparisons:
 						return comp_dict
 
-					completed_indexes.add(inner_index)
 
 		return comp_dict
 
