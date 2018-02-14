@@ -42,7 +42,7 @@ def plot(points,
 	#	plt.plot(X, ya, shape[i], linewidth=2.5,markersize=7,color=colors[i])
 	#	i += 1
 
-	plt.legend(legend,loc=loc, prop={"size": 13})
+	plt.legend(legend,loc=loc, prop={"size": 10})
 	plt.title(title)
 	plt.xlabel(xaxis)
 	plt.ylabel(yaxis)

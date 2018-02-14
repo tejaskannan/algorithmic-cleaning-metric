@@ -37,4 +37,7 @@ class BooleanConstraint:
 		return self.get_operation_name() in self.RANGE_OPS
 
 	def should_sort_ascending(self):
-		return self.get_operation_name() == "le" or self.get_operation_name() == "leq"
+		return self.get_operation_name() == "ge" or self.get_operation_name() == "geq"
+
+	def __repr__(self):
+		return "_".join(self.get_attrs())

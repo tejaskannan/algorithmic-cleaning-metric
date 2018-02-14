@@ -17,71 +17,72 @@ class Simulator:
 
 	def __init__(self, file_name):
 		self.dataset = Dataset(file_name)
-		constr1 = BooleanConstraint(["phone"], "eq")
-		constr2 = BooleanConstraint(["zip"], "neq")
-		constr3 = BooleanConstraint([], "none")
-		self.constraints = [constr1, constr2, constr3]
-		
+		self.report_freq = 10000
+		self.max_num_comparisons = 20000
 
-	def run(self):
-		data_points = []
+	def write_to_csv(self, file_name, data_points, legend):
+		checkpoints = list(range(self.report_freq, self.max_num_comparisons + 1, self.report_freq))
+		with open(file_name, "w") as csvfile:
+			csv_writer = csv.writer(csvfile, delimiter='\t', quotechar='\t', quoting=csv.QUOTE_MINIMAL)
+			csv_writer.writerow(legend)
+			for checkpoint in checkpoints:
+				row = [checkpoint]
+				for data_point in data_points:
+					if checkpoint not in data_point:
+						row.append("0")
+					else:
+						row.append(str(data_point[checkpoint]))
+				csv_writer.writerow(row)
+				
+
+	def run(self, tests):
 		#legend = ["Hierarchical"]
-		max_num_comparisons = 400000
+		random_trials = 1
+		epsilons = [0.99]
+		lambdas = [0.5]
 
-		legend = []
-		ep = 0.01
-		for i in range(0, 2):
-			start = time.time()
-			detector = IndividualEpsilonGreedyDetector(self.dataset, self.constraints[:], epsilon1=ep, epsilon2=ep)
-			data_points.append(detector.find_violations(max_num_comparisons=max_num_comparisons))
-			end = time.time()
-			name = "Individual Epsilon Greedy " + str(ep) + " Time v" + str(i)
-			print(name + " : " + str(end - start) + " seconds")
-			legend.append(name)
-		
-		legend = legend + ["Brute Force", "Hierarchical"]
+		i = 0
+		for file_name, constraints in tests:
+			dataset = Dataset(file_name)
+			data_points = []
+			legend = ["Comparisons"]
+			for constraint in constraints:
+				brute_force_detector = BruteForceDetector(dataset, constraint[:])
+				data_points.append(brute_force_detector.find_violations(comp_freq=self.report_freq, max_num_comparisons=self.max_num_comparisons))
+				legend.append("Brute Force")
 
-		start = time.time()
-		detector = BruteForceDetector(self.dataset, self.constraints)
-		data_points.append(detector.find_violations(max_num_comparisons=max_num_comparisons))
-		end = time.time()
-		print("Brute Force Time: " + str(end - start) + " seconds")
+				hierarchical_detector = HierarchicalDetector(dataset, constraint[:])
+				data_points.append(hierarchical_detector.find_violations(comp_freq=self.report_freq, max_num_comparisons=self.max_num_comparisons))
+				legend.append("Hierarchical")
 
-		start = time.time()
-		detector = HierarchicalDetector(self.dataset, self.constraints[:])
-		data_points.append(detector.find_violations(max_num_comparisons=max_num_comparisons))
-		end = time.time()
-		print("Hierarchical Time: " + str(end - start) + " seconds")
+				for epsilon in epsilons:
+					for lmbda in lambdas:
+						for trial in range(0, random_trials):
+							random_detector = IndividualEpsilonGreedyDetector(dataset, constraint[:], epsilon=epsilon, discount=lmbda)
+							data_points.append(random_detector.find_violations(comp_freq=self.report_freq, max_num_comparisons=self.max_num_comparisons))
+							legend.append("Epsilon Greedy Ep: " + str(epsilon) + " Disc: " + str(lmbda) + " v" + str(trial))
 
-		plot(data_points, "Errors Found over Time", "Number of Comparisons", "Number of Errors", legend=legend, filename="output_500k_phone_zip.png", ymax=7000)
-
-		#start = time.time()
-		#detector = HierarchicalSampleDetector(self.dataset, self.constraints[:], 0.25)
-		#print("Hierarchical Sample Number of Functions: " + str(detector.find_violations()))
-		#end = time.time()
-		#print("Time: " + str(end - start) + " seconds")
-		
-		#cache_size = 50
-		#detector = RandomCacheDetector(self.dataset, self.constraints, cache_size)
-		#start = time.time()
-		#print("Cache Number of Functions: " + str(detector.find_violations()))
-		#end = time.time()
-		#print("Time: " + str(end - start))
-
-		#detector = GroupByCacheDetector(self.dataset, self.constraints, cache_size)
-		#start = time.time()
-		#print("Group By Cache Number of Functions: " + str(detector.find_violations()))
-		#end = time.time()
-		#print("Time: " + str(end - start))
-		
-		#detector = SRSDetector(self.dataset, self.constraints, 0.01, 1)
-		#print("SRS Number of Functions: " + str(detector.find_violations()))
-		#detector = WeightedSampleDetector(self.dataset, self.constraints, 0.01, 1, use_inputs=True)
-		#print("Weighted Number of Functions Ordered By Inputs: " + str(detector.find_violations()))
-		#detector = WeightedSampleDetector(self.dataset, self.constraints, 0.01, 1, use_inputs=False)
-		#print("Weighted Number of Functions Ordered By Outputs: " + str(detector.find_violations()))
+				dataset_name = (file_name.split("/")[1]).split(".")[0]
+				attrs = [constr.get_attrs() for constr in constraint]
+				flattened_attrs = []
+				for attr_list in attrs:
+					for attr in attr_list:
+						flattened_attrs.append(attr)
+				constr_str = "_".join(flattened_attrs)
+				self.write_to_csv(dataset_name + "_" + constr_str + "_" + str(i) + ".csv", data_points, legend)
+				i += 1
+				
 
 
 if __name__ == "__main__":
 	simulator = Simulator("datasets/dirty_hospital_small.csv")
-	simulator.run()     
+	constr1 = BooleanConstraint(["zip"], "le")
+	constr2 = BooleanConstraint(["phone"], "ge")
+	constr3 = BooleanConstraint([], "none")
+	constraints = [[constr1, constr2, constr3]]
+	simulator.run([("datasets/dirty_hospital_small.csv", constraints)])    
+
+
+
+
+ 
