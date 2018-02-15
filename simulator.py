@@ -15,8 +15,7 @@ from constraints.boolean_constraint import BooleanConstraint
 
 class Simulator:
 
-	def __init__(self, file_name):
-		self.dataset = Dataset(file_name)
+	def __init__(self):
 		self.report_freq = 10000
 		self.max_num_comparisons = 20000
 
@@ -36,10 +35,9 @@ class Simulator:
 				
 
 	def run(self, tests):
-		#legend = ["Hierarchical"]
-		random_trials = 1
-		epsilons = [0.99]
-		lambdas = [0.5]
+		random_trials = 100
+		epsilons = [0.99, 0.9, 0.75, 0.5]
+		lambdas = [0.9, 0.5, 0.25, 0.1]
 
 		i = 0
 		for file_name, constraints in tests:
@@ -75,11 +73,12 @@ class Simulator:
 
 
 if __name__ == "__main__":
-	simulator = Simulator("datasets/dirty_hospital_small.csv")
-	constr1 = BooleanConstraint(["zip"], "le")
-	constr2 = BooleanConstraint(["phone"], "ge")
-	constr3 = BooleanConstraint([], "none")
-	constraints = [[constr1, constr2, constr3]]
+	simulator = Simulator()
+	constr1 = [BooleanConstraint(["zip"], "le"), BooleanConstraint(["phone"], "ge"), BooleanConstraint([], "none")]
+	constr2 = [BooleanConstraint(["zip"], "eq"), BooleanConstraint(["state"], "neq"), BooleanConstraint([], "none")]
+	constr3 = [BooleanConstraint(["hospitalname"], "eq"), BooleanConstraint(["city"], "eq"), BooleanConstraint(["state"], "neq")]
+	constr4 = [BooleanConstraint(["city", "state"]), "eq"), BooleanConstraint(["phone"], "eq"), BooleanConstraint(["hospitalname"], "neq")] 
+	constraints = [constr1, constr2, constr3, constr4]
 	simulator.run([("datasets/dirty_hospital_small.csv", constraints)])    
 
 
