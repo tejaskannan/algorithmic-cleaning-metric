@@ -11,6 +11,7 @@ class BooleanConstraint:
 		self.operation = Operations().get_operation(operation_name)
 
 	# Returns True if the constraint is upheld, False if violated.
+	# True generally means error while False means no error
 	# Input rows are named tuples given by output of DataFrame iterator.
 	def evaluate(self, row1_tuple, row2_tuple):
 		if len(self.attrs) == 0:
