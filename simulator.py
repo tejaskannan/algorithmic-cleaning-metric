@@ -77,7 +77,7 @@ if __name__ == "__main__":
 	constr1 = [BooleanConstraint(["zip"], "le"), BooleanConstraint(["phone"], "ge"), BooleanConstraint([], "none")]
 	constr2 = [BooleanConstraint(["zip"], "eq"), BooleanConstraint(["state"], "neq"), BooleanConstraint([], "none")]
 	constr3 = [BooleanConstraint(["hospitalname"], "eq"), BooleanConstraint(["city"], "eq"), BooleanConstraint(["state"], "neq")]
-	constr4 = [BooleanConstraint(["city", "state"]), "eq"), BooleanConstraint(["phone"], "eq"), BooleanConstraint(["hospitalname"], "neq")] 
+	constr4 = [BooleanConstraint(["city", "state"], "eq"), BooleanConstraint(["phone"], "eq"), BooleanConstraint(["hospitalname"], "neq")] 
 	constraints = [constr1, constr2, constr3, constr4]
 	simulator.run([("datasets/dirty_hospital_small.csv", constraints)])    
 
