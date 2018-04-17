@@ -3,8 +3,6 @@ import csv
 from plotter import plot
 from dataset import Dataset
 from detectors.brute_force import BruteForceDetector
-from detectors.random_cache import RandomCacheDetector
-from detectors.group_by_cache import GroupByCacheDetector
 from detectors.simple_random_sample import SRSDetector
 from detectors.weighted_sample import WeightedSampleDetector
 from detectors.hierarchical import HierarchicalDetector
@@ -17,7 +15,7 @@ class Simulator:
 
 	def __init__(self):
 		self.report_freq = 10000
-		self.max_num_comparisons = 20000
+		self.max_num_comparisons = 500000
 
 	def write_to_csv(self, file_name, data_points, legend):
 		checkpoints = list(range(self.report_freq, self.max_num_comparisons + 1, self.report_freq))
@@ -35,7 +33,7 @@ class Simulator:
 				
 
 	def run(self, tests):
-		random_trials = 100
+		random_trials = 25
 		epsilons = [0.99, 0.9, 0.75, 0.5]
 		lambdas = [0.9, 0.5, 0.25, 0.1]
 
